@@ -3,10 +3,10 @@ require File.expand_path('../parser/version', __FILE__)
 
 module Fullname
   module Parser
-  
-    # When "II" or "III" or even "IV" appear in the Middle Name/Suffix slot, it can safely be assumed that they are Suffixes. 
-    # (John Smith has a son named John Smith II, who has a son named John Smith III, etc.) However, nobody (except a king) 
-    # puts "I" after their name to indicate that they are the "first." If anything, they put "Sr." Therefore, a letter "I" 
+
+    # When "II" or "III" or even "IV" appear in the Middle Name/Suffix slot, it can safely be assumed that they are Suffixes.
+    # (John Smith has a son named John Smith II, who has a son named John Smith III, etc.) However, nobody (except a king)
+    # puts "I" after their name to indicate that they are the "first." If anything, they put "Sr." Therefore, a letter "I"
     # appearing in the Middle Name/Suffix slot can be assumed to be their Middle Initial.
     # So here 'i' will be removed from the GENERATION_LIST
     #
@@ -15,12 +15,12 @@ module Fullname
       'ii', 'iii', 'iv', 'v', 'vi'
       # 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv', 'xvi', 'xvii', 'xviii', 'xix', 'xx',
     ] unless const_defined?(:GENERATION_LIST)
-    
+
     GLOBAL_SUFFIX_LIST = GENERATION_LIST + [
       'jr', 'jr.',
       'sr', 'sr.',
     ] unless const_defined?(:GLOBAL_SUFFIX_LIST)
-    
+
     SUFFIX_LIST = [
       'b.a.',
       'capt.', 'col.', 'cfa', 'c.f.a', 'c.f.a.', 'cpa', 'c.p.a', 'c.p.a.',
@@ -30,7 +30,7 @@ module Fullname
       'r.s.m.',
       'usn',
     ] unless const_defined?(:SUFFIX_LIST)
-  
+
     IGNORABLE_SUFFIXES = [
       'do', 'd.o.', 'd.o', 'dds', 'd.d.s.', 'dr', 'dr.',
       'esq', 'esq.',
@@ -45,12 +45,12 @@ module Fullname
       'retd', 'ret.', 'retd.',
       'usmc',
     ] unless const_defined?(:IGNORABLE_SUFFIXES)
-  
+
     SUFFIX_CAN_BE_LASTNAME = [
       'do',
     ] unless const_defined?(:SUFFIX_CAN_BE_LASTNAME)
-    
-    PREFIX_LIST = [ 
+
+    PREFIX_LIST = [
       'asst.',
       'assoc.', 'associate',  # va law
       'asst. dean', 'associate dean', 'interim dean',  # va law
@@ -63,7 +63,7 @@ module Fullname
       'honorable', 'hon', 'hon.', 'honret.',
       'interim', 'instructor',  # va law
       'judge', 'justice', 'chiefjustice',
-      'lawyer', 'lieutenant', 'lcdr', 'lt', 'lt.', 'ltc', 'ltc.', 'ltcol.', 'ltcol', 'ltjg', 
+      'lawyer', 'lieutenant', 'lcdr', 'lt', 'lt.', 'ltc', 'ltc.', 'ltcol.', 'ltcol', 'ltjg',
       'm/g', 'mr', 'mr.', 'mr..', 'ms', 'ms.', 'mrs', 'mrs.', 'maj', 'maj.', 'major', 'miss', 'miss.',
       'president', 'prof', 'prof.', 'professor',
       'rabbi',
@@ -75,10 +75,10 @@ module Fullname
     IGNORABLE_PREFIXS = [
       'the',
     ] unless const_defined?(:IGNORABLE_PREFIXS)
-  
-    
+
+
     # These will be considered part of the last name
-    LAST_NAME_EXTENSIONS = [    
+    LAST_NAME_EXTENSIONS = [
       'bar', 'ben',
       'da', 'dal', 'dan', 'de', 'del', 'den', 'der', 'des', 'dela', 'della', 'di', 'do', 'du',
       'el',
@@ -88,11 +88,11 @@ module Fullname
       'st', 'st.', 'sta', 'sta.',
       'van','von', 'ver', 'vanden', 'vander'
     ] unless const_defined?(:LAST_NAME_EXTENSIONS)
-    
+
     CONVERSION = {
-      '1st' => 'I', 
-      '2nd' => 'II', 
-      '3rd' => 'III', 
+      '1st' => 'I',
+      '2nd' => 'II',
+      '3rd' => 'III',
       '4th' => 'IV',
       '5th' => 'V',
       '6th' => 'VI',
@@ -100,7 +100,7 @@ module Fullname
       '8th' => 'VIII',
       '9th' => 'IX',
     } unless const_defined?(:CONVERSION)
-    
+
     class Error < StandardError; end
     class Identifier
       attr_reader :name, :original_name, :prefix, :firstname, :middlename, :lastname, :suffix
@@ -126,25 +126,25 @@ module Fullname
         #     'Jay (Jung) Heum Kim'        =>  'Jay Heum Kim'
         name.gsub!(/\(.*?\)/, ' ')
         name.gsub!(/\(|\)/, '')
-        # remove quoted strings 
+        # remove quoted strings
         # Darin "Derry" Ronald Anderson    => 'Darin Ronald Anderson'
-        # Nancy M. "Shelli" Egger          => 'Nancy M. Egger'  
-        # Nicole 'nikki' Adame             => 'Nicole Adame'                  
+        # Nancy M. "Shelli" Egger          => 'Nancy M. Egger'
+        # Nicole 'nikki' Adame             => 'Nicole Adame'
         name.gsub!(/".*?"/, ' ')
         name.gsub!(/'.*?'/i, ' ')
-    
+
         # remove curly brackets
         # Henry C.{Harry} Wilson           => 'Henry C. Wilson'
         # Cellestine {Steen} Armstrong     => 'Cellestine Armstrong'
         name.gsub!(/\{.*?\}/, ' ')
-        
+
         # remove exceptional names
         # ex. "William . D. 'Bill' Beard"  =>  "William D. 'Bill' Beard"
-        # also this regexp can remove 
+        # also this regexp can remove
         name.gsub!(/\s+[^a-zA-Z,]+\s+/, ' ')
         # Why we use substitute(sub) comma to whitespace, not global substitute(gsub).
         # the reason is the substitution applies for suffix splitting, not for replacing
-        # bad data. As we want, convert "Marvene A Gordon, JD" to "Marvene A Gordon JD", 
+        # bad data. As we want, convert "Marvene A Gordon, JD" to "Marvene A Gordon JD",
         # so that the suffix will get into the split array.
         # and, standardize suffix as '2nd' => 'II', '3rd' => 'III'
         CONVERSION.each_pair do |finder, replacer|
