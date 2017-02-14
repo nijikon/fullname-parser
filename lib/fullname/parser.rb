@@ -56,7 +56,7 @@ module Fullname
       'asst. dean', 'associate dean', 'interim dean',  # va law
       'attorney', 'atty.',
       'bg', 'bg.', 'brig', 'brig.', 'gen',
-      'colonel', 'cardinal', 'capt', 'capt.', 'captain', 'cdr', 'col' , 'col.', 'congressman', 'cpt', 'cpt.', 'comm.', 'commissioner',
+      'colonel', 'cardinal', 'capt', 'capt.', 'captain', 'cdr', 'col' , 'col.', 'congressman', 'cpt', 'cpt.', 'comm.', 'commissioner', 'councilmember',
       'dean.', 'dentist', 'dir.', 'doctor', 'dr', 'dr.',
       'exec.',
       'general', 'gen', 'gen.',
